@@ -2,8 +2,12 @@ import os
 import webbrowser
 import sys
 
+RESULTS_DIR = 'resultados'
+
 def list_txt_files():
-    files = [f for f in os.listdir('.') if f.endswith('.txt') and f != 'comparison_results.txt']
+    if not os.path.isdir(RESULTS_DIR):
+        return []
+    files = [os.path.join(RESULTS_DIR, f) for f in os.listdir(RESULTS_DIR) if f.endswith('.txt')]
     return sorted(files)
 
 def parse_usernames(filepath):
@@ -50,11 +54,6 @@ def main():
     mode = input("Selecciona modo (1 o 2): ").strip()
 
     if mode == '2':
-        confirm = input(f"¿Estás seguro de abrir {total_users} pestañas? (s/n): ")
-        if confirm.lower() != 's':
-            print("Cancelado.")
-            return
-        
         for user in users:
             url = f"https://www.instagram.com/{user}/"
             print(f"Abriendo: {user}")

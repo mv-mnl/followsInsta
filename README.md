@@ -59,11 +59,12 @@ Ejecuta el script de análisis para generar las listas:
 python3 analyze_instagram.py
 ```
 
-Esto generará los siguientes archivos de texto:
+Esto generará los siguientes archivos de texto dentro de la carpeta `resultados/` (esta carpeta **no se borra** al terminar `ejecutar.sh`):
 *   `followers.txt`: Todos los que te siguen.
 *   `following.txt`: Todos los que sigues.
 *   `me_siguen_no_sigo.txt`: **"Fans"** (Te siguen, tú no).
 *   `sigo_no_me_siguen.txt`: **"No Follow Back"** (Sigues, no te siguen).
+*   `solicitudes_pendientes.txt`: **Pendientes** (Les mandaste solicitud y no la han aceptado; se lee de `pending_follow_requests.html`).
 
 #### Paso 2: Abrir perfiles (Opcional)
 

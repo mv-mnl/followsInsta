@@ -1,6 +1,9 @@
 import os
 import re
 
+# Carpeta donde se guardan los resultados (no se borra al terminar ejecutar.sh)
+OUTPUT_DIR = 'resultados'
+
 def extract_users_from_html(file_path):
     """Extracts usernames from an Instagram HTML file using regex."""
     if not os.path.exists(file_path):
@@ -15,8 +18,22 @@ def extract_users_from_html(file_path):
     users = re.findall(pattern, content)
     return set(users)
 
+def extract_pending_requests(file_path):
+    """Extracts usernames from pending_follow_requests.html (stored in table cells, not links)."""
+    if not os.path.exists(file_path):
+        print(f"Aviso: {file_path} not found.")
+        return set()
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    pattern = r'(?:Username|Nombre de usuario)</td><td[^>]*>([^<]+)</td>'
+    return set(u.strip() for u in re.findall(pattern, content))
+
 def write_list_to_file(filename, title, users):
     """Writes a list of users to a numbered text file."""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    filename = os.path.join(OUTPUT_DIR, filename)
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(f"{title} ({len(users)}):\n")
         for idx, user in enumerate(sorted(list(users)), 1):
@@ -27,11 +44,13 @@ def main():
     # Input files
     following_html = 'connections/followers_and_following/following.html'
     followers_html = 'connections/followers_and_following/followers_1.html'
+    pending_html = 'connections/followers_and_following/pending_follow_requests.html'
 
     # Extract users
     print("Extracting users from HTML files...")
     following_set = extract_users_from_html(following_html)
     followers_set = extract_users_from_html(followers_html)
+    pending_set = extract_pending_requests(pending_html)
 
     if not following_set or not followers_set:
         print("Error: Could not extract users. Make sure HTML files exist.")
@@ -39,6 +58,7 @@ def main():
 
     print(f"Found {len(following_set)} users in Following.")
     print(f"Found {len(followers_set)} users in Followers.")
+    print(f"Found {len(pending_set)} pending follow requests.")
 
     # Calculate categories
     fans = followers_set - following_set
@@ -49,7 +69,8 @@ def main():
         ("followers.txt", "FOLLOWERS (Todos los que me siguen)", followers_set),
         ("following.txt", "FOLLOWING (Todos los que sigo)", following_set),
         ("me_siguen_no_sigo.txt", "QUE ME SIGUE Y NO SIGO (Fans)", fans),
-        ("sigo_no_me_siguen.txt", "QUE SIGO Y NO ME SIGUE (No me devuelven el follow)", not_following_back)
+        ("sigo_no_me_siguen.txt", "QUE SIGO Y NO ME SIGUE (No me devuelven el follow)", not_following_back),
+        ("solicitudes_pendientes.txt", "SOLICITUDES ENVIADAS NO ACEPTADAS (Pendientes)", pending_set)
     ]
 
     # Generate files
